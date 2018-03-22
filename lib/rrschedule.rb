@@ -4,7 +4,7 @@
 module RRSchedule
   class Schedule
     attr_reader :flights, :rounds, :gamedays
-    attr_accessor :teams, :rules, :cycles, :start_date, :exclude_dates,:shuffle, :group_flights, :balanced_gt, :balanced_ps
+    attr_accessor :teams, :rules, :cycles, :start_date, :exclude_dates,:shuffle, :group_flights, :balanced_gt, :balanced_ps, :use_bye_weeks
 
     def initialize(params={})
       @gamedays = []
@@ -17,6 +17,7 @@ module RRSchedule
       self.start_date = params[:start_date] || Date.today
       self.group_flights = params[:group_flights].nil? ? true : params[:group_flights]
       self.rules = params[:rules] || []
+      self.use_bye_weeks = params[:use_bye_weeks].nil? ? false : params[:use_bye_weeks]
       self
     end
 
@@ -105,7 +106,13 @@ module RRSchedule
         res << gd.date.strftime("%Y-%m-%d") + "\n"
         res << "==========\n"
         gd.games.sort{|g1,g2| g1.gt == g2.gt ? g1.ps <=> g2.ps : g1.gt <=> g2.gt}.each do |g|
-          res << "#{g.ta.to_s} VS #{g.tb.to_s} on playing surface #{g.ps} at #{g.gt.strftime("%I:%M %p")}\n"
+          if [g.ta,g.tb].include?(:dummy)
+            # Was getting an odd TypeError Exception if I tried to go straight into res
+            str = g.ta == :dummy ? "#{g.tb} has a BYE\n" : "#{g.ta} has a BYE\n"
+            res << str
+          else
+            res << "#{g.ta.to_s} VS #{g.tb.to_s} on playing surface #{g.ps} at #{g.gt.strftime("%I:%M %p")}\n"
+          end
         end
         res << "\n"
       end
@@ -185,7 +192,7 @@ module RRSchedule
       
       flat_games.flatten!
       flat_games.each do |game|
-        dispatch_game(game) unless [game.team_a,game.team_b].include?(:dummy)
+        dispatch_game(game) unless !self.use_bye_weeks && [game.team_a,game.team_b].include?(:dummy)
       end
 
       #We group our schedule by gameday
@@ -232,8 +239,12 @@ module RRSchedule
 
       #We found our playing surface and game time, add the game in the schedule.
       @schedule << {:team_a => game.team_a, :team_b => game.team_b, :gamedate => @cur_date, :ps => @cur_ps, :gt => @cur_gt}
-      update_team_stats(game,@cur_gt,@cur_ps)
-      update_resource_availability(@cur_gt,@cur_ps)
+      # Don't update stats or resources if the game includes a dummy
+      # Games will not include :dummy if use_bye_weeks is false
+      if ![game.team_a, game.team_b].include?(:dummy)
+        update_team_stats(game,@cur_gt,@cur_ps)
+        update_resource_availability(@cur_gt,@cur_ps)
+      end
 
 
       #If no resources left, change rule

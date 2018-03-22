@@ -72,10 +72,10 @@ require './lib/rrschedule.rb'
 include RRSchedule
 schedule=RRSchedule::Schedule.new(
               :teams => [
-                %w(A1 A2 A3 A4 A5 A6 A7 A8),
+                %w(A1 A2 A3 A4 A5 A6 A7),
                 %w(B1 B2 B3 B4 B5 B6 B7 B8),
-                %w(C1 C2 C3 C4 C5 C6 C7 C8),
                 %w(D1 D2 D3 D4 D5 D6 D7 D8),
+                %w(E1 E2 E3 E4 E5 E6 E7 E8),   
               ],
 
               :rules => [
@@ -89,5 +89,32 @@ schedule=RRSchedule::Schedule.new(
               :cycles => 1,
               :start_date => Date.parse("2010/10/13"),
               :balanced_gt => false,
-              :balanced_ps => false
-            ).generate      
+              :balanced_ps => false,
+            ).generate
+            
+require 'rubygems'
+require 'active_support/all'
+require './lib/rrschedule.rb'
+include RRSchedule
+schedule=RRSchedule::Schedule.new(
+              :teams => [
+                %w(A1 A2 A3 A4 A5 A6 A7),
+                %w(B1 B2 B3 B4 B5 B6 B7 B8),
+                %w(D1 D2 D3 D4 D5 D6 D7 D8),
+                %w(E1 E2 E3 E4 E5 E6 E7 E8),   
+              ],
+
+              :rules => [
+                RRSchedule::Rule.new(
+                  :wday => 3,
+                  :gt => ["6:00 PM", "6:50 PM", "7:40 PM", "8:30 PM", "9:20 PM", "10:10 PM", "11:00"],
+                  :ps => ["North Field", "South Field"],
+                )
+                
+              ],
+              :cycles => 1,
+              :start_date => Date.parse("2010/10/13"),
+              :balanced_gt => false,
+              :balanced_ps => false,
+              :use_bye_weeks => true
+            ).generate
