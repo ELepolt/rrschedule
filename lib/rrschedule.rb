@@ -296,7 +296,7 @@ module RRSchedule
         end
         x.sort_by{|k,v| [v[0],v[1]]}.first[0]
       else
-        @gt_ps_avail[gt].first[0]
+        @gt_ps_avail[gt].first
       end
     end
 
