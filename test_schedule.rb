@@ -98,10 +98,11 @@ require './lib/rrschedule.rb'
 include RRSchedule
 schedule=RRSchedule::Schedule.new(
               :teams => [
-                %w(A1 A2 A3 A4 A5 A6 A7),
+                %w(A1 A2 A3 A4 A5 A6 A7 A8),
                 %w(B1 B2 B3 B4 B5 B6 B7 B8),
-                %w(D1 D2 D3 D4 D5 D6 D7 D8),
-                %w(E1 E2 E3 E4 E5 E6 E7),   
+                %w(C1 C2 C3 C4 C5 C6 C7),
+                %w(D1 D2 D3 D4 D5 D6),
+                %w(E1 E2 E3 E4 E5 E6),
               ],
 
               :rules => [
@@ -113,7 +114,7 @@ schedule=RRSchedule::Schedule.new(
                 
               ],
               :cycles => 1,
-              :start_date => Date.parse("2010/10/13"),
+              :start_date => Date.parse("2018/03/20"),
               :balanced_gt => false,
               :balanced_ps => false,
               :use_bye_weeks => true
@@ -137,7 +138,7 @@ schedule=RRSchedule::Schedule.new(
               ],
               :cycles => 1,
               :start_date => Date.parse("2010/10/13"),
-              :balanced_gt => false,
-              :balanced_ps => false,
+              :balanced_gt => true,
+              :balanced_ps => true,
               :use_bye_weeks => true
             ).generate

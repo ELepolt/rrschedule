@@ -99,6 +99,7 @@ module RRSchedule
     end
     
     #human readable schedule
+    require 'byebug'
     def to_s
       res = ""
       res << "#{self.gamedays.size.to_s} gamedays\n"
@@ -108,12 +109,17 @@ module RRSchedule
         gd.games.sort{|g1,g2| g1.gt == g2.gt ? g1.ps <=> g2.ps : g1.gt <=> g2.gt}.each do |g|
           if [g.ta,g.tb].include?(:dummy)
             # Was getting an odd TypeError Exception if I tried to go straight into res
-            str = g.ta == :dummy ? "#{g.tb} has a BYE\n" : "#{g.ta} has a BYE\n"
-            res << str
+            str = g.ta == :dummy ? "#{g.tb}" : "#{g.ta}"
+            res << "#{str} has a BYE\n"
           else
             res << "#{g.ta.to_s} VS #{g.tb.to_s} on playing surface #{g.ps} at #{g.gt.strftime("%I:%M %p")}\n"
           end
         end
+        teams_with_byes = self.teams.flatten - gd.games.map{|g| [g.team_a, g.team_b]}.flatten
+        teams_with_byes.each do |team|
+          res << "#{team} has a BYE\n"
+        end
+
         res << "\n"
       end
       res
@@ -218,8 +224,8 @@ module RRSchedule
         reset_resource_availability
       end
 
-      @cur_gt = get_best_gt(game)
-      @cur_ps = get_best_ps(game,@cur_gt)
+      @cur_gt = get_best_gt(game) if ![game.team_a, game.team_b].include?(:dummy)
+      @cur_ps = get_best_ps(game,@cur_gt) if ![game.team_a, game.team_b].include?(:dummy)
 
       @cur_date ||= next_game_date(self.start_date,@cur_rule.wday)
       @schedule ||= []
