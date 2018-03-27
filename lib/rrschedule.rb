@@ -230,10 +230,14 @@ module RRSchedule
         if games_this_date.select{|g| [game.team_a,game.team_b].include?(g[:team_a]) || [game.team_a,game.team_b].include?(g[:team_b])}.size >0
           @cur_rule_index = (@cur_rule_index < @rules.size-1) ? @cur_rule_index+1 : 0
           @cur_rule = @rules[@cur_rule_index]
-          reset_resource_availability
           @cur_gt = get_best_gt(game)
           @cur_ps = get_best_ps(game,@cur_gt)
-          @cur_date = next_game_date(@cur_date+=1,@cur_rule.wday)
+          # Only run this when a game includes :dummy
+          # Won't run if use_bye_weeks is false
+          if ![game.team_a, game.team_b].include?(:dummy)
+            reset_resource_availability
+            @cur_date = next_game_date(@cur_date+=1,@cur_rule.wday) 
+          end
         end
       end
 
